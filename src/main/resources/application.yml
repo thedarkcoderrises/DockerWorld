@@ -2,11 +2,11 @@ logging:
   level:
     root: ERROR
     com.tdcr.dockerize: DEBUG
-  file: logs/app.log
+  file: logs/dockerworld.log
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 application:
-  message: Hey there! message from
-  appname: DockerWorld
+  message: Hey there!
+  appname: I'm theDarkCoderRises 🤘 from DockerWorld.

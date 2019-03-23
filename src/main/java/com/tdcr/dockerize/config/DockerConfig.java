@@ -14,11 +14,11 @@ public class DockerConfig {
     DefaultDockerClientConfig defaultDockerClientConfig(){
         DefaultDockerClientConfig config
                 = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withRegistryEmail("thedarkcoderrises@gmail.com")
-                .withRegistryPassword("Docker@123")
-                .withRegistryUsername("thedarkcoderrises")
-                .withDockerConfig("/Users/javabrain/.docker/")
-                .withDockerHost("tcp://localhost:5555").build();
+//                .withRegistryEmail("thedarkcoderrises@gmail.com")
+//                .withRegistryPassword("Docker@123")
+//                .withRegistryUsername("thedarkcoderrises")
+//                .withDockerConfig("/Users/javabrain/.docker/")
+                .withDockerHost("tcp://socat:5555").build();
         return config;
     }
 
