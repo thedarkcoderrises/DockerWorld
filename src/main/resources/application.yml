@@ -9,4 +9,4 @@ logging:
 
 application:
   message: Hey there!
-  appname: I'm theDarkCoderRises 🤘 from DockerWorld.
+  appname: I'm theDarkCoderRises from DockerWorld.
