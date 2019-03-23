@@ -1,2 +1,3 @@
 # DockerWorld
-Hello World
+- Hello World
+- Execute docker cmds using dockerAPI's
