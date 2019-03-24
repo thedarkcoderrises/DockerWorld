@@ -1,6 +1,7 @@
 package com.tdcr.dockerize.controller;
 
 import com.tdcr.dockerize.service.DockerService;
+import com.tdcr.dockerize.vo.ContainerVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class DockerController {
@@ -21,7 +24,7 @@ public class DockerController {
     @Autowired
     DockerService dockerService;
 
-    @RequestMapping("/")
+    @RequestMapping("/app")
     String home() {
         return message + " " + appname;
     }
@@ -32,8 +35,8 @@ public class DockerController {
     }
 
     @RequestMapping(value="/psa",produces= MediaType.APPLICATION_JSON_VALUE)
-    String dockerpsa() {
-        return dockerService.listAllContainers("");
+    List<ContainerVO> dockerpsa() {
+        return dockerService.listAllContainers(null);
     }
 
     @RequestMapping(value="/inspect/{containerId}", method = RequestMethod.POST)
