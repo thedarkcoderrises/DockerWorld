@@ -10,3 +10,5 @@ logging:
 application:
   message: Hey there!
   appname: I'm theDarkCoderRises from DockerWorld.
+
+#server.port: 8081
