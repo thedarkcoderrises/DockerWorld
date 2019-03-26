@@ -1,6 +1,8 @@
 package com.tdcr.dockerize.vo;
 
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ContainerPort;
+import org.springframework.util.StringUtils;
 
 public class ContainerVO {
 
@@ -8,6 +10,8 @@ public class ContainerVO {
     String containerName;
     String status;
     long memorySizeInMB;
+    String port;
+    String runningSince;
 
     public ContainerVO(Container container) {
         super();
@@ -15,6 +19,30 @@ public class ContainerVO {
         this.setContainerName(container.getNames()[0]);
         this.setMemorySizeInMB((container.getSizeRootFs()/1024)/1024);
         this.setStatus(container.getStatus().startsWith("Up")? "Running":"Stopped");
+        this.setPort(container.getPorts().length==0?"":getPublicPort(container.getPorts()[0]));
+        this.setRunningSince(container.getStatus());
+    }
+
+    private String getPublicPort(ContainerPort port) {
+        return (StringUtils.isEmpty(port.getIp())?"":port.getIp()) +
+                (StringUtils.isEmpty(port.getIp())?"":":")+
+                (StringUtils.isEmpty(port.getPublicPort())?"":port.getPublicPort());
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
+    }
+
+    public String getRunningSince() {
+        return runningSince;
+    }
+
+    public void setRunningSince(String runningSince) {
+        this.runningSince = runningSince;
     }
 
     public String getStatus() {

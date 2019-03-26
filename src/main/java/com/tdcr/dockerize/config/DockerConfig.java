@@ -14,7 +14,7 @@ public class DockerConfig {
     DefaultDockerClientConfig defaultDockerClientConfig(){
         DefaultDockerClientConfig config
                 = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerHost("tcp://socat:5555").build();
+                .withDockerHost("tcp://localhost:5555").build();
         return config;
     }
 
