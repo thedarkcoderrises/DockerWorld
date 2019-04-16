@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class ComputeStats {
 
-    private static DecimalFormat df2 = new DecimalFormat("#.##");
+    private static DecimalFormat df2 = new DecimalFormat("#.####");
     private static String PERCENT_SYMBOL = "%";
     private static String EMPTY_STRING = "";
 
@@ -47,7 +47,13 @@ public class ComputeStats {
     }
 
     public static String calcCPU(Statistics stats) {
-        return "";
+        Map cpuUsageMap = ((Map)stats.getCpuStats().get("cpu_usage"));
+        long totalUsage = ((Number)cpuUsageMap.get("total_usage")).longValue();
+        long kernelModeUsage = ((Number)cpuUsageMap.get("usage_in_kernelmode")).longValue();
+        long userModeUsage = ((Number)cpuUsageMap.get("usage_in_usermode")).longValue();
+        long systemUsage = ((Number)stats.getCpuStats().get("system_cpu_usage")).longValue();
+        String result = df2.format(((totalUsage+kernelModeUsage+userModeUsage)*1.0/systemUsage)*100);
+        return result + PERCENT_SYMBOL;
     }
 
     public static String calcNetworkStats(Statistics stats) {
@@ -58,14 +64,12 @@ public class ComputeStats {
 
     public static Map<String,String> computeStats(Statistics stats) {
         Map<String,String> statMap = new HashMap<>();
-        String memPercent = ComputeStats.computeMemoryInPercent(stats);
-        String memoryUsage = ComputeStats.getMemory(stats, "usage");
-        String memoryLimit = ComputeStats.getMemory(stats, "limit");
-        String cpuPercent = ComputeStats.calcCPU(stats);
-        String netIO = ComputeStats.calcNetworkStats(stats);
+        String memPercent = computeMemoryInPercent(stats);
+        String memoryUsage = getMemory(stats, "max_usage");
+        String memoryLimit = getMemory(stats, "limit");
         statMap.put("MEM %",memPercent);
         statMap.put("MEM_USAGE / LIMIT",memoryUsage +" / "+memoryLimit);
-        statMap.put("CPU %","");
+//        statMap.put("CPU %", calcCPU(stats));
         statMap.put("NET I/O",calcNetworkStats(stats));
         return statMap;
     }

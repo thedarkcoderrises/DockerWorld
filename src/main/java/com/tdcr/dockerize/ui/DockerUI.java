@@ -2,12 +2,15 @@ package com.tdcr.dockerize.ui;
 
 
 import com.tdcr.dockerize.service.DockerService;
+import com.tdcr.dockerize.ui.mycomponent.FilteredGridLayout;
 import com.tdcr.dockerize.vo.ContainerVO;
+import com.vaadin.annotations.Push;
+import com.vaadin.annotations.Theme;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.ui.grid.ColumnResizeMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
+import com.vaadin.ui.components.grid.HeaderRow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.vaadin.dialogs.ConfirmDialog;
@@ -16,13 +19,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+@Theme("docker")
 @SpringUI(path = "/docker")
+@Push
 public class DockerUI extends UI {
 
     @Autowired
     DockerService dockerService;
-
     Panel footerPanel = new Panel();
     Panel gridPanel = new Panel();
     VerticalLayout rootLayout = new VerticalLayout();
@@ -30,11 +33,14 @@ public class DockerUI extends UI {
     Button refreshBtn = new Button();
     Button statsBtn = new Button();
     Button updateContainerStatusBtn = new Button();
+    FilteredGridLayout gridFilterRow ;
     Grid<ContainerVO> grid;
-    Label screenName = new Label("Docker Container Details");
+    Label screenName = new Label();
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
+        screenName.setCaption("Docker Container Details");
+        screenName.setCaptionAsHtml(true);
         refreshBtn.setIcon(VaadinIcons.REFRESH);
         statsBtn.setIcon(VaadinIcons.PIE_CHART);
         updateContainerStatusBtn.setIcon(VaadinIcons.POWER_OFF);
@@ -42,13 +48,13 @@ public class DockerUI extends UI {
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.setSizeFull();
         grid.setHeight("500px");
-        grid.setColumns("containerId", "containerName", "memorySizeInMB", "status", "port", "runningSince");
-        grid.setColumnResizeMode(ColumnResizeMode.ANIMATED);
+        setGridColumnFilter();
         grid.setColumnReorderingAllowed(true);
-        grid.setDetailsGenerator(e -> showSelectedContainerStats(e.getContainerId(),e.getStatus()));
+        grid.setDetailsGenerator(e -> showSelectedContainerStats(e));
+        grid.setStyleGenerator(containerVO ->
+                "running".equalsIgnoreCase(containerVO.getStatus()) ? "green" : "amber");
         gridPanel.setContent(grid);
         footerLayout.addComponents(statsBtn,refreshBtn,updateContainerStatusBtn);
-        rootLayout.addComponents(screenName,gridPanel,footerPanel);
         footerLayout.setComponentAlignment(refreshBtn , Alignment.MIDDLE_RIGHT);
         footerLayout.setComponentAlignment(statsBtn , Alignment.MIDDLE_RIGHT);
         footerLayout.setComponentAlignment(updateContainerStatusBtn,Alignment.MIDDLE_RIGHT);
@@ -58,7 +64,17 @@ public class DockerUI extends UI {
         refreshBtn.addClickListener(e -> refreshData());
         updateContainerStatusBtn.addClickListener(e -> updateContainerStatus());
         statsBtn.addClickListener(e -> statSubWindow());
+        footerPanel.addStyleName("transparentPanel");
+        rootLayout.addComponents(screenName,gridPanel,footerPanel);
         setContent(rootLayout);
+        setStyleName("backgroundimage");
+    }
+
+    private void setGridColumnFilter() {
+        gridFilterRow = new FilteredGridLayout(grid);
+        HeaderRow filterHeaderRow = grid.appendHeaderRow();
+        filterHeaderRow.getCell("containerName").setComponent(gridFilterRow.getContainerNameFilter());
+        filterHeaderRow.getCell("imageName").setComponent(gridFilterRow.getImageNameFilter());
     }
 
     private void statSubWindow() {
@@ -82,8 +98,8 @@ public class DockerUI extends UI {
         String statsMsg = status == true? "Starting" :"Stopping";
 
         ConfirmDialog.show(UI.getCurrent(),"",
-                statsMsg+" "+containerVO.getContainerName()+"...", "YES", "NO", new ConfirmDialog.Listener(){
-
+                statsMsg+" "+containerVO.getContainerName()+"...",
+                "YES", "NO", new ConfirmDialog.Listener(){
             @Override
             public void onClose(ConfirmDialog confirmDialog) {
                 if(confirmDialog.isConfirmed()){
@@ -114,35 +130,69 @@ public class DockerUI extends UI {
         grid.setDetailsVisible(vo ,!grid.isDetailsVisible(vo));
     }
 
-    private Component showSelectedContainerStats(String containerId,String status) {
-        HorizontalLayout layout = new HorizontalLayout();
+    private Component showSelectedContainerStats(ContainerVO item) {
+        VerticalLayout layout = new VerticalLayout();
         Panel detailPanel = new Panel();
-        TextField rowDetails = new TextField();
-        if(status.equalsIgnoreCase("stopped")){
-            rowDetails.setValue("Container is not up!");
-        }else {
-            rowDetails.setValue(statDetails(containerId));
-        }
-        rowDetails.setCaptionAsHtml(true);
-        layout.addComponent(rowDetails);
-        layout.setComponentAlignment(rowDetails, Alignment.MIDDLE_CENTER);
         detailPanel.setContent(layout);
-        detailPanel.setSizeFull();
+        Label emptyStat = new Label();
+        if(item.getStatus().equalsIgnoreCase("stopped")){
+            emptyStat.setValue("Container is not up!");
+            emptyStat.setCaptionAsHtml(true);
+            layout.addComponent(emptyStat);
+            layout.setComponentAlignment(emptyStat, Alignment.MIDDLE_CENTER);
+
+        }else {
+            Thread statFeeder = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int i =0;
+                    while (i<10) {
+                        if(grid.isDetailsVisible(item)){
+                            access(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setStatDetails(item.getContainerId(), layout);
+                                }
+                            });
+                            try {
+                                Thread.sleep( 2000 );
+                                layout.removeAllComponents();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            i+=1;
+                        }else{
+                            i=10;
+                        }
+
+                    }
+                }
+            });
+            statFeeder.start();
+        }
         return detailPanel;
     }
 
-    private String statDetails(String containerId) {
-        StringBuilder finalStr = new StringBuilder("<b>Stats</b> :");
+    private void setStatDetails(String containerId, VerticalLayout layout) {
+        HorizontalLayout hl =  new HorizontalLayout();
+        Label keyLabel;
+        TextField valueTextField;
         Map<String,String> map =getStats(containerId);
         for(String key : map.keySet()){
             if(!StringUtils.isEmpty(map.get(key))){
-                finalStr.append(key);
-                finalStr.append(":");
-                finalStr.append(map.get(key));
-                finalStr.append(";");
+                keyLabel = new Label(key+":");
+                valueTextField = new TextField();
+                valueTextField.setValue((map.get(key)));
+                valueTextField.setEnabled(false);
+                valueTextField.setHeight(90, Unit.PERCENTAGE);
+                valueTextField.addStyleName("textField");
+                hl.addComponents(keyLabel,valueTextField);
+                hl.setComponentAlignment(valueTextField, Alignment.BOTTOM_CENTER);
+                hl.setComponentAlignment(keyLabel, Alignment.MIDDLE_CENTER);
+                hl.setHeight(100, Unit.PERCENTAGE);
+                layout.addComponent(hl);
             }
         }
-        return finalStr.toString();
     }
 
 
@@ -161,5 +211,9 @@ public class DockerUI extends UI {
     private void refreshData() {
         List<ContainerVO> lst = dockerService.listAllContainers(null);
         grid.setItems(lst);
+        gridFilterRow.getContainerNameFilter().clear();
+        gridFilterRow.getImageNameFilter().clear();
     }
+
 }
+

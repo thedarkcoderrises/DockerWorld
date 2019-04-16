@@ -12,6 +12,8 @@ public class ContainerVO {
     long memorySizeInMB;
     String port;
     String runningSince;
+    String imageId;
+    String imageName;
 
     public ContainerVO(Container container) {
         super();
@@ -21,12 +23,30 @@ public class ContainerVO {
         this.setStatus(container.getStatus().startsWith("Up")? "Running":"Stopped");
         this.setPort(container.getPorts().length==0?"":getPublicPort(container.getPorts()[0]));
         this.setRunningSince(container.getStatus());
+        this.setImageId(container.getImageId());
+        this.setImageName(container.getImage());
     }
 
     private String getPublicPort(ContainerPort port) {
         return (StringUtils.isEmpty(port.getIp())?"":port.getIp()) +
                 (StringUtils.isEmpty(port.getIp())?"":":")+
                 (StringUtils.isEmpty(port.getPublicPort())?"":port.getPublicPort());
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
     }
 
     public String getPort() {

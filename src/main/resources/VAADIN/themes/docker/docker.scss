@@ -1,0 +1,50 @@
+@import "../valo/valo.scss";
+@import "../valo/valo";
+@mixin docker {
+@include valo;
+
+    .backgroundimage {
+          background: url("images/docker.jpg") !important;
+    }
+    .transparentPanel {
+        background : transparent;
+        border : 0px solid;
+    }
+    .v-grid-header {
+        color: #3F5E6F;
+        font-weight: 500;
+    }
+    .v-captiontext{
+        color: #3F5E6F;
+        font-weight: 1000;
+    }
+    .textField{
+        background-color: #F5B25D;
+        color: #3F5E6F;
+        font-weight: 1000;
+    }
+
+   /*  .v-app-loading::before {
+        width: 400px;
+        height: 400px;
+        background: url(images/loader.gif) no-repeat 50%;
+      }*/
+
+     .v-grid-row.green .v-grid-cell.frozen.last-frozen {
+       background-color: yellowgreen;
+     }
+
+      .v-grid-row.green {
+         color: #3F5E6F;
+         font-weight: 250;
+       }
+       .v-grid-row.amber {
+            color: #3F5E6F;
+            font-weight: 250;
+        }
+
+     .v-grid-row.amber .v-grid-cell.frozen.last-frozen {
+            background-color: orange;
+      }
+
+}
