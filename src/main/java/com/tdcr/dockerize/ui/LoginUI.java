@@ -5,14 +5,14 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.LoginForm;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
 @Theme("docker")
 @SpringUI
-public class LoginUI extends UI {
+public class LoginUI extends AbstractUI {
 
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
+        setTitleName();
         LoginForm component = new LoginForm();
         component.addLoginListener(e -> {
             if ("admin".equals(e.getLoginParameter("username")) && "admin".equals(e.getLoginParameter("password"))) {

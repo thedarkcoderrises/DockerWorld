@@ -22,7 +22,7 @@ import java.util.Set;
 @Theme("docker")
 @SpringUI(path = "/docker")
 @Push
-public class DockerUI extends UI {
+public class DockerUI extends AbstractUI {
 
     @Autowired
     DockerService dockerService;
@@ -39,6 +39,7 @@ public class DockerUI extends UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
+        setTitleName();
         screenName.setCaption("Docker Container Details");
         screenName.setCaptionAsHtml(true);
         refreshBtn.setIcon(VaadinIcons.REFRESH);
