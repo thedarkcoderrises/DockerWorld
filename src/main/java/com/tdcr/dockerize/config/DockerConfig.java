@@ -31,16 +31,18 @@ public class DockerConfig {
     @Bean
     public Map<String,DockerClient> dockerClientMap (DockerProps dp){
         Map <String,DockerClient> dockerClientMap = new HashMap<>();
+        Map<String, String> dockerDaemonMap = new HashMap<>();
         for (String key:
                 dp.getDockerDaemonMap().keySet()) {
-            if(StringUtils.isEmpty(dp.getDockerDaemonMap().get(key)))
-            {
-                dp.getDockerDaemonMap().remove(key);
+            if(StringUtils.isEmpty(dp.getDockerDaemonMap().get(key))){
+               continue;
             }
+            dockerDaemonMap.put(key,dp.getDockerDaemonMap().get(key));
             dockerClientMap.put(key,
                     DockerClientBuilder.getInstance(
                             defaultDockerClientConfig(dp.getDockerDaemonMap().get(key))).build());
         }
+        dp.setDockerDaemonMap(dockerDaemonMap);
         return dockerClientMap;
     }
 
@@ -54,6 +56,10 @@ public class DockerConfig {
         private Map<String, String> dockerDaemonMap = new HashMap<String, String>();
         public Map<String, String> getDockerDaemonMap() {
             return this.dockerDaemonMap;
+        }
+
+        public void setDockerDaemonMap(Map<String, String> dockerDaemonMap) {
+            this.dockerDaemonMap = dockerDaemonMap;
         }
     }
 
