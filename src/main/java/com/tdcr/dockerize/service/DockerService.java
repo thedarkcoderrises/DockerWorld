@@ -18,4 +18,6 @@ public interface DockerService {
     Map<String,String> getContainerStats(String containerId) throws Exception;
 
     String updateContainerStatus (String containerId, boolean status);
+
+    void updateDockerClient (String dockerDaemonName);
 }

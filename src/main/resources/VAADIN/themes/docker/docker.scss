@@ -9,6 +9,13 @@ $v-app-loading-text: "DockerWorld";
     .backgroundimage {
           background: url("images/docker.jpg") !important;
     }
+
+    .comboBox {
+        color: #3F5E6F;
+        width: 130px;
+        height: 30px;
+     }
+
     .transparentPanel {
         background : transparent;
         border : 0px solid;

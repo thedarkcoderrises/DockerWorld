@@ -12,3 +12,7 @@ application:
   appname: I'm theDarkCoderRises from DockerWorld.
 
 server.port: 8081
+
+dockerDaemonMap:
+   LOCAL_DD: ""
+   AWS_DD: "13.233.104.172"

@@ -1,6 +1,7 @@
 package com.tdcr.dockerize.ui;
 
 
+import com.tdcr.dockerize.config.DockerConfig;
 import com.tdcr.dockerize.service.DockerService;
 import com.tdcr.dockerize.ui.mycomponent.FilteredGridLayout;
 import com.tdcr.dockerize.vo.ContainerVO;
@@ -26,6 +27,9 @@ public class DockerUI extends AbstractUI {
 
     @Autowired
     DockerService dockerService;
+    @Autowired
+    DockerConfig.DockerProps dockerProps;
+
     Panel footerPanel = new Panel();
     Panel gridPanel = new Panel();
     VerticalLayout rootLayout = new VerticalLayout();
@@ -36,12 +40,17 @@ public class DockerUI extends AbstractUI {
     FilteredGridLayout gridFilterRow ;
     Grid<ContainerVO> grid;
     Label screenName = new Label();
+    ComboBox<String> ddMap = new ComboBox<>();
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         setTitleName();
         screenName.setCaption("Docker Container Details");
         screenName.setCaptionAsHtml(true);
+        ddMap.setStyleName("comboBox");
+        ddMap.setPlaceholder("Daemon...");
+        ddMap.setItems(dockerProps.getDockerDaemonMap().keySet());
+        setDockerDaemonListener();
         refreshBtn.setIcon(VaadinIcons.REFRESH);
         statsBtn.setIcon(VaadinIcons.PIE_CHART);
         updateContainerStatusBtn.setIcon(VaadinIcons.POWER_OFF);
@@ -66,10 +75,25 @@ public class DockerUI extends AbstractUI {
         updateContainerStatusBtn.addClickListener(e -> updateContainerStatus());
         statsBtn.addClickListener(e -> statSubWindow());
         footerPanel.addStyleName("transparentPanel");
-        rootLayout.addComponents(screenName,gridPanel,footerPanel);
+        HorizontalLayout headerHl = new HorizontalLayout();
+        headerHl.addComponents(screenName,ddMap);
+        headerHl.setComponentAlignment(screenName,Alignment.MIDDLE_CENTER);
+        rootLayout.addComponents(headerHl,gridPanel,footerPanel);
         setContent(rootLayout);
         setStyleName("backgroundimage");
     }
+
+    private void setDockerDaemonListener() {
+        ddMap.addValueChangeListener(event -> {
+            if (event.getSource().isEmpty()) {
+                Notification.show("Inavlid action!", Notification.Type.WARNING_MESSAGE);
+            } else {
+                dockerService.updateDockerClient(event.getValue());
+                refreshBtn.click();
+            }
+        });
+    }
+
 
     private void setGridColumnFilter() {
         gridFilterRow = new FilteredGridLayout(grid);
@@ -91,7 +115,7 @@ public class DockerUI extends AbstractUI {
         ContainerVO containerVO = getSelectedRow();
         if(containerVO == null) return;
 
-        if(containerVO.getContainerName().contains("socat")){
+        if(containerVO.getContainerName().contains("socat") || containerVO.getContainerName().contains("dw") ){
             Notification.show("Inavlid action!", Notification.Type.WARNING_MESSAGE);
             return;
         }

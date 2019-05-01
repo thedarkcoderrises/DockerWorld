@@ -25,6 +25,7 @@ public class DockerServiceImpl implements DockerService {
     private static Logger LOG = LoggerFactory.getLogger(DockerServiceImpl.class);
 
     @Autowired
+    Map<String,DockerClient> dockerClientMap;
     DockerClient dockerClient;
 
     @Override
@@ -98,6 +99,11 @@ public class DockerServiceImpl implements DockerService {
         }
 
         return containerId;
+    }
+
+    @Override
+    public void updateDockerClient(String dockerDaemonName) {
+        dockerClient = dockerClientMap.get(dockerDaemonName);
     }
 
 
