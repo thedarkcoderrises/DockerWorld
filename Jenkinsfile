@@ -34,7 +34,7 @@ pipeline {
         stage('Containerising DockerWorld') {
           agent any
            steps {
-                   sh 'docker run -d -p 8081:8080 -v /home/ec2-user/logs:/logs --name dockerworld --link=socat dockerworld:1.0'
+                   sh 'docker run -d -p 8081:8081 -v /home/ec2-user/logs:/logs --name dockerworld --link=socat dockerworld:1.0'
                  }
          }
     }
