@@ -19,12 +19,12 @@ pipeline {
             steps{
                     script{
                         containerId = sh (
-                        script :'docker ps -aqf "name=dockerworld"',
+                        script :'docker ps -aqf "name=dw"',
                         returnStdout: true
                         ).trim()
                         if("${containerId}"!= ""){
-                          sh 'docker stop dockerworld'
-                          sh 'docker rm dockerworld'
+                          sh 'docker stop dw'
+                          sh 'docker rm dw'
                           sh 'docker rmi $(docker images --filter=reference=dockerworld --format "{{.ID}}")'
                         }
                     }
