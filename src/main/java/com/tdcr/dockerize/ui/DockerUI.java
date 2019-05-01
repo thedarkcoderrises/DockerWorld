@@ -35,7 +35,7 @@ public class DockerUI extends AbstractUI {
     VerticalLayout rootLayout = new VerticalLayout();
     HorizontalLayout footerLayout = new HorizontalLayout();
     Button refreshBtn = new Button();
-    Button statsBtn = new Button();
+    Button containerLogBtn = new Button();
     Button updateContainerStatusBtn = new Button();
     FilteredGridLayout gridFilterRow ;
     Grid<ContainerVO> grid;
@@ -52,7 +52,7 @@ public class DockerUI extends AbstractUI {
         ddMap.setItems(dockerProps.getDockerDaemonMap().keySet());
         setDockerDaemonListener();
         refreshBtn.setIcon(VaadinIcons.REFRESH);
-        statsBtn.setIcon(VaadinIcons.PIE_CHART);
+        containerLogBtn.setIcon(VaadinIcons.PIE_CHART);
         updateContainerStatusBtn.setIcon(VaadinIcons.POWER_OFF);
         grid = new Grid<>(ContainerVO.class);
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
@@ -64,23 +64,22 @@ public class DockerUI extends AbstractUI {
         grid.setStyleGenerator(containerVO ->
                 "running".equalsIgnoreCase(containerVO.getStatus()) ? "green" : "amber");
         gridPanel.setContent(grid);
-        footerLayout.addComponents(statsBtn,refreshBtn,updateContainerStatusBtn);
+        footerLayout.addComponents(containerLogBtn,refreshBtn,updateContainerStatusBtn);
         footerLayout.setComponentAlignment(refreshBtn , Alignment.MIDDLE_RIGHT);
-        footerLayout.setComponentAlignment(statsBtn , Alignment.MIDDLE_RIGHT);
+        footerLayout.setComponentAlignment(containerLogBtn, Alignment.MIDDLE_RIGHT);
         footerLayout.setComponentAlignment(updateContainerStatusBtn,Alignment.MIDDLE_RIGHT);
         footerLayout.setSpacing(true);
         footerPanel.setContent(footerLayout);
         grid.addItemClickListener(e -> updateDetailVisibility(e));
         refreshBtn.addClickListener(e -> refreshData());
         updateContainerStatusBtn.addClickListener(e -> updateContainerStatus());
-        statsBtn.addClickListener(e -> statSubWindow());
+        containerLogBtn.addClickListener(e -> logSubWindow());
         footerPanel.addStyleName("transparentPanel");
         HorizontalLayout headerHl = new HorizontalLayout();
         headerHl.addComponents(screenName,ddMap);
         headerHl.setComponentAlignment(screenName,Alignment.MIDDLE_CENTER);
         rootLayout.addComponents(headerHl,gridPanel,footerPanel);
         setContent(rootLayout);
-        setStyleName("backgroundimage");
     }
 
     private void setDockerDaemonListener() {
@@ -102,13 +101,18 @@ public class DockerUI extends AbstractUI {
         filterHeaderRow.getCell("imageName").setComponent(gridFilterRow.getImageNameFilter());
     }
 
-    private void statSubWindow() {
+    private void logSubWindow() {
         ContainerVO selectedRow = getSelectedRow();
         if(selectedRow == null) return;
 
-        ContainerStatUI popup = new ContainerStatUI(selectedRow);
-        UI.getCurrent().removeWindow(popup);
-        UI.getCurrent().addWindow(popup);
+        try {
+            ContainerLogUI popup = new ContainerLogUI(selectedRow);
+            popup.updateLogDiv(dockerService.getLogs(selectedRow.getContainerId()));
+            UI.getCurrent().removeWindow(popup);
+            UI.getCurrent().addWindow(popup);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateContainerStatus() {

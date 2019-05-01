@@ -20,4 +20,6 @@ public interface DockerService {
     String updateContainerStatus (String containerId, boolean status);
 
     void updateDockerClient (String dockerDaemonName);
+
+    String getLogs(String containerId) throws InterruptedException;
 }

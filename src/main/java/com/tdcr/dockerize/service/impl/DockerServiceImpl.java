@@ -4,9 +4,11 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Statistics;
+import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.tdcr.dockerize.service.DockerService;
 import com.tdcr.dockerize.util.ComputeStats;
 import com.tdcr.dockerize.util.FirstObjectResultCallback;
+import com.tdcr.dockerize.util.LogContainerCallback;
 import com.tdcr.dockerize.vo.ContainerVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class DockerServiceImpl implements DockerService {
@@ -104,6 +107,17 @@ public class DockerServiceImpl implements DockerService {
     @Override
     public void updateDockerClient(String dockerDaemonName) {
         dockerClient = dockerClientMap.get(dockerDaemonName);
+    }
+
+    @Override
+    public String getLogs(String containerId) throws InterruptedException {
+        LogContainerCallback loggingCallback = new
+                LogContainerCallback();
+
+        LogContainerCmd cmd = dockerClient.logContainerCmd(containerId);
+        cmd.withStdOut(true).withTimestamps(true).withTailAll().exec(loggingCallback);
+        loggingCallback.awaitCompletion(3, TimeUnit.SECONDS);
+        return loggingCallback.getEntries().toString();
     }
 
 

@@ -10,7 +10,8 @@ public abstract class AbstractUI extends UI {
     }
 
    void  setTitleName(){
-        UI.getCurrent().getPage().setTitle("Docker");
+       UI.getCurrent().getPage().setTitle("Docker");
+       setStyleName("backgroundimage");
     }
 
 }

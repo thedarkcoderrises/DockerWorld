@@ -14,5 +14,5 @@ application:
 server.port: 8081
 
 dockerDaemonMap:
-   LOCAL_DD: ""
-   AWS_DD: "13.233.104.172"
+   LOCAL_DD: "localhost"
+   AWS_DD: "13.232.246.215"

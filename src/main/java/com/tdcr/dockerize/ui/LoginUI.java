@@ -23,6 +23,5 @@ public class LoginUI extends AbstractUI {
             }
         });
         setContent(component);
-        setStyleName("backgroundimage");
     }
 }
